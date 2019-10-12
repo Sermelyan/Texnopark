@@ -1,0 +1,35 @@
+<code class="cpp">{	
+	"name": "GProject",
+	"project": {
+		"name": "EducateMe",
+		"description": "Подбор оптимального маршрута посещения достопримечательностей"
+	},
+	"size": 4,
+	"members": [
+		{
+			"name": "Иван",
+			"surname": "Ерохин",
+			"group": "АПО-12",
+			"link_to_git_profile": "github.com/S4ll7"
+		},
+		{
+			"name": "Сергей",
+			"surname": "Меликян",
+			"group": "АПО-12",
+			"link_to_git_profile": "github.com/Sermelyan"
+		},
+		{
+			"name": "Никита",
+			"surname": "Потапович",
+			"group": "АПО-12",
+			"link_to_git_profile": "github.com/maus74"
+		},
+		{
+			"name": "Алексей",
+			"surname": "Сирмайс",
+			"group": "АПО-12",
+			"link_to_git_profile": "github.com/AlekseySirmais7"
+		} 
+	],
+	"team_lead": "Сергей Меликян"
+}</code>
