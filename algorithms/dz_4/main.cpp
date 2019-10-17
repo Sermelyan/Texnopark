@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include <cassert>
+#include <sstream>
 //Считаю сумму двух минимумов. Накапливаю ее и пихаю в кучу. Пока куча не опустеет.
 
 template<class T>
@@ -81,13 +82,13 @@ class Vector {
 template <class T>
 class Heap {
  public:
-    Heap() {};
-    explicit Heap(const Vector<T> _arr) : arr(_arr){
-        for(long i = arr.Size() / 2 - 1; i >= 0; i--) {
+    Heap() = default;
+    explicit Heap(const Vector<T> _arr) : arr(_arr) {
+        for (int64_t i = arr.Size() / 2 - 1; i >= 0; i--) {
             siftDown(i);
         }
     }
-    ~Heap() {};
+    ~Heap() = default;
 
     void Insert(T element) {
         arr.PushBack(element);
@@ -134,15 +135,106 @@ class Heap {
     }
 };
 
-int main() {
-    Vector<int> v;
-    for (int i = 10000; i >= 0; i--) {
-        v.PushBack(i);
-    }
-    Heap<int> h(v);
+unsigned int calcTime(Heap<unsigned int>& h) {
+    unsigned int sum = 0;
     while (!h.IsEmpty()) {
-        std::cout << h.ExtractMin() << std::endl;
+        unsigned int temp = h.ExtractMin();
+        if (!h.IsEmpty()) {
+            temp += h.ExtractMin();
+        }
+        if (!h.IsEmpty()) {
+            h.Insert(temp);
+        }
+        sum += temp;
     }
-    
+    return sum;
+}
+
+void run(std::istream& input, std::ostream& output) {
+    Heap<unsigned int> h;
+    std::size_t n = 0;
+    input >> n;
+    assert(n < 100);
+    for (std::size_t i = 0, sum = 0; i < n; i++) {
+        unsigned int temp;
+        input >> temp;
+        assert(temp > 0 && temp < 1000000000);
+        sum += temp;
+        assert(sum < 2000000000);
+        h.Insert(temp);
+    }
+    output << calcTime(h);
+}
+
+void test() {
+    {
+        Vector<int> v;
+        assert(v.IsEmpty());
+        for (int i = 9; i > -1; i--) {
+            v.PushBack(i);
+        }
+        assert(!v.IsEmpty());
+        Heap<int> h(v);
+        for (int i = 0; i < 10; i++)
+            assert(h.ExtractMin() == i);
+        assert(h.IsEmpty());
+    }
+    {
+        Heap<int> h;
+        assert(h.IsEmpty());
+        for (int i = 9; i > -1; i--)
+            h.Insert(i);
+        assert(!h.IsEmpty());
+        for (int i = 0; i < 10; i++)
+            assert(h.ExtractMin() == i);
+        assert(h.IsEmpty());
+    }
+    //  1-й тест из условия
+    {
+        std::stringstream input;
+        std::stringstream output;
+        input << "3 3 2 1";
+        run(input, output);
+        assert(output.str() == "9");
+    }
+    //  2-й тест из условия
+    {
+        std::stringstream input;
+        std::stringstream output;
+        input << "5 5 2 3 4 6";
+        run(input, output);
+        assert(output.str() == "45");
+    }
+    //  3-й тест из условия
+    {
+        std::stringstream input;
+        std::stringstream output;
+        input << "5 3 7 6 1 9";
+        run(input, output);
+        assert(output.str() == "56");
+    }
+    // Тест на сокрость
+    {
+        std::stringstream input;
+        std::stringstream output;
+        input << 99 << std::endl;
+        for (size_t i = 1; i < 100 ; i++) {
+            input << i << " ";
+        }
+        run(input, output);
+        std::cout << output.str();
+    }
+}
+
+int main(int argc, char** argv) {
+    if (argc >=  2) {
+        std::string s(argv[1]);
+        if (s == "test") {
+            test();
+            return 0;
+        }
+    }
+    run(std::cin, std::cout);
+    std::cout << std::endl;
     return 0;
 }
