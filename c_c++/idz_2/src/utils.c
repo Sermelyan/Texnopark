@@ -53,3 +53,38 @@ int make_random_rate(Users *u, Objects *o, unsigned count){
     }
     return 0;
 }
+
+void print_users(Users *u) {
+    for (size_t i = 0; i < u->size; i++) {
+        printf("user id: %u ", u->array[i].user_id);
+        printf("size: %u, pointer: %u\n", u->array[i].mark_size, u->array[i].mark_ptr);
+        for (size_t j = 0; j < u->array[i].mark_ptr; j++) {
+            printf("\t%u\n", u->array[i].marked_obj[j]);
+        }
+    }
+}
+
+void print_objects(Objects *o) {
+    for (size_t i = 0; i < o->size; i++) {
+        printf("object id: %u ", o->array[i].obj_id);
+        printf("size: %u, pointer: %u\n", o->array[i].rate_size, o->array[i].rate_ptr);
+        for (size_t j = 0; j < o->array[i].rate_ptr; j++) {
+            printf("rate #%u:\n", j);
+            printf("\tuser id: %u\n", o->array[i].rating_array[j].user_id);
+            printf("\tmark: %u\n", o->array[i].rating_array[j].mark);
+        }
+    }
+}
+
+//int binSearch(const Vector<int>& arr,
+//            size_t first, size_t right,
+//            int element) {
+//    size_t last = right;
+//    for (size_t mid = (first + last)/2;  first < last ; mid = (first + last)/2) {
+//        if (arr[mid] < element)
+//            first = mid +1;
+//        else
+//            last = mid;
+//    }
+//    return (first == right || arr[first] != element ) ? -1 : first;
+//}

@@ -62,16 +62,6 @@ Users *create_users(unsigned size) {
     return temp;
 }
 
-void print_users(Users *u) {
-    for (size_t i = 0; i < u->size; i++) {
-        printf("user id: %u ", u->array[i].user_id)
-        printf("size: %u, pointer: %u\n", u->array[i].mark_size, u->array[i].mark_ptr);
-        for (size_t j = 0; j < u->array[i].mark_ptr; j++) {
-            printf("\t%u\n", u->array[i].marked_obj[j]);
-        }
-    }
-}
-
 void free_users(Users *users) {
     unsigned size = users->size;
     User *arr = users->array;

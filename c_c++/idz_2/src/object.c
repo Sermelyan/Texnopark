@@ -27,7 +27,6 @@ void free_object(Object* object) {
         return;
     if (object->rating_array)
         free(object->rating_array);
-    free(object);
 }
 
 int add_rate(Object* obj, Mark m, unsigned user_id) {
@@ -75,8 +74,6 @@ Objects *create_objects(unsigned size) {
     temp->array = t_arr;
     return temp;
 }
-
-
 
 void free_objects(Objects *objs) {
     unsigned size = objs->size;
