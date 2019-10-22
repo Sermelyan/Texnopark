@@ -141,9 +141,9 @@ int make_random_rate(Users *u, Objects *o, unsigned count){
 //     return errflag;
 // }
 
-void print_users(Users *u) {
+void print_users(const Users *u) {
     for (unsigned i = 0; i < u->size; i++) {
-        printf("user id: %u ", u->array[i].user_id);
+        printf("user user_id: %u ", u->array[i].user_id);
         printf("size: %u, pointer: %u\n", u->array[i].mark_size, u->array[i].mark_ptr);
         for (unsigned j = 0; j < u->array[i].mark_ptr; j++) {
             printf("\t%u\n", u->array[i].marked_obj[j]);
@@ -151,13 +151,13 @@ void print_users(Users *u) {
     }
 }
 
-void print_objects(Objects *o) {
+void print_objects(const Objects *o) {
     for (unsigned i = 0; i < o->size; i++) {
-        printf("object id: %u ", o->array[i].obj_id);
+        printf("object id: %u ,", o->array[i].obj_id);
         printf("size: %u, pointer: %u\n", o->array[i].rate_size, o->array[i].rate_ptr);
         for (unsigned j = 0; j < o->array[i].rate_ptr; j++) {
             printf("rate #%u:\n", j);
-            printf("\tuser id: %u\n", o->array[i].rating_array[j].user_id);
+            printf("\tuser user_id: %u\n", o->array[i].rating_array[j].user_id);
             printf("\tmark: %u\n", o->array[i].rating_array[j].mark);
         }
     }

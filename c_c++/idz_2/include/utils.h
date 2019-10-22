@@ -13,8 +13,8 @@ Objects* gen_objects(unsigned size);
 int make_random_rate(Users *u, Objects *o, unsigned count);
 // int make_random_rate(Users *u, Objects *o, unsigned count, unsigned max_thr);
 
-void print_users(Users *u);
-void print_objects(Objects *o);
+void print_users(const Users *u);
+void print_objects(const Objects *o);
 int bin_search(const unsigned *arr,
               unsigned first, unsigned right,
               unsigned element);
