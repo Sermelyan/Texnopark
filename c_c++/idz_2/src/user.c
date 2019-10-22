@@ -42,6 +42,12 @@ int add_marked_obj(User* usr,unsigned obj_id) {
 
     array[pointer] = obj_id;
 
+    for (unsigned i = pointer; i > 0 && array[i] < array[i-1]; i--) {
+        unsigned temp = array[i];
+        array[i] = array[i-1];
+        array[i-1]  = temp;
+    }
+
     usr->mark_ptr = pointer + 1;
     usr->mark_size = size;
     usr->marked_obj = array;
@@ -65,7 +71,7 @@ Users *create_users(unsigned size) {
 void free_users(Users *users) {
     unsigned size = users->size;
     User *arr = users->array;
-    for (size_t i = 0; i < size; i++) {
+    for (unsigned i = 0; i < size; i++) {
         free_user(&arr[i]);
     }
     free(arr);

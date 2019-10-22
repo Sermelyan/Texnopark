@@ -78,7 +78,7 @@ Objects *create_objects(unsigned size) {
 void free_objects(Objects *objs) {
     unsigned size = objs->size;
     Object *arr = objs->array;
-    for (size_t i = 0; i < size; i++) {
+    for (unsigned i = 0; i < size; i++) {
         free_object(&arr[i]);
     }
     free(arr);

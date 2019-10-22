@@ -7,13 +7,13 @@
 int main() {
     Users *users = gen_users(5000000);
     Objects *objects = gen_objects(16000);
-    if (make_random_rate(users, objects, 500000000, 1)) {
+    if (make_random_rate(users, objects, 500000000)) {
         free_users(users);
         free_objects(objects);
         return 1;
     }
-//    print_users(users);
-//    print_objects(objects);
+    print_users(users);
+    print_objects(objects);
     free_users(users);
     free_objects(objects);
     return 0;
