@@ -11,8 +11,7 @@ target_link_libraries(utils pthread)
 add_library(top_single STATIC src/top_single.c)
 
 add_library(top_multi SHARED src/top_multi.c)
-target_link_libraries(top_multi utils pthread)
 target_include_directories(top_multi PUBLIC include)
 
 add_executable(main src/main.c)
-target_link_libraries(main utils top_single #[[top_multi]])
+target_link_libraries(main utils top_multi)

@@ -172,7 +172,7 @@ Top* get_top(Objects *objs, User *user, unsigned count) {
         pthread_join(thr[j], NULL);
         errflag = errflag || t[j].error;
         if (errflag) {
-            free(t);
+            free_arg(t, max_thr);
             return NULL;
         }
     }

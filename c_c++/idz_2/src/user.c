@@ -23,7 +23,7 @@ int add_marked_obj(User* usr,unsigned obj_id) {
     unsigned *array = usr->marked_obj;
 
     if (!size) {
-        size = 128;
+        size = 2;
         unsigned *temp = calloc(size, sizeof(unsigned));
         if (!temp) {
             return 1;
