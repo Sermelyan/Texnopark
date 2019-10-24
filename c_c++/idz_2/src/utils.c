@@ -6,7 +6,7 @@ Copyright 2019 Сергей Меликян АПО-12
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-// #include <pthread.h>
+#include <pthread.h>
 #define MAX_USR 50000000
 #define MAX_OBJ 25000
 #define MAX_RATE 750000000
@@ -33,113 +33,111 @@ Objects* gen_objects(unsigned size){
     return temp;
 }
 
-int make_random_rate(Users *u, Objects *o, unsigned count){
-   if (count > MAX_RATE)
-       return 1;
+//int make_random_rate(Users *u, Objects *o, unsigned count){
+//   if (count > MAX_RATE)
+//       return 1;
+//
+//   srandom(time(NULL));
+//
+//   unsigned u_size = u->size;
+//   unsigned o_size = o->size;
+//   User *u_arr = u->array;
+//   Object *o_arr = o->array;
+//
+//   for (unsigned i = 0; i < count; i++) {
+//       unsigned object = random() % o_size;
+//       unsigned user = 0;
+//       do {
+//          user = random() % u_size;
+//          if (!u_arr[user].mark_ptr)
+//              break;
+//       } while (bin_search(u_arr[user].marked_obj, 0, u_arr[user].mark_ptr, object) != -1);
+//       if (add_rate(&o_arr[object], random() % 5 + 1, user))
+//           return 1;
+//       if (add_marked_obj(&u_arr[user], object))
+//           return 1;
+//   }
+//   return 0;
+//}
 
-   srandom(time(NULL));
+ typedef struct args {
+     unsigned count;
+     unsigned u_size;
+     unsigned o_size;
+     User *u_arr;
+     Object *o_arr;
+     int result;
+ } Thr_args;
 
-   unsigned u_size = u->size;
-   unsigned o_size = o->size;
-   User *u_arr = u->array;
-   Object *o_arr = o->array;
+ void* worker(void* args){
 
-   for (unsigned i = 0; i < count; i++) {
-       unsigned object = random() % o_size;
-       unsigned user = 0;
-       do {
-          user = random() % u_size;
-          if (!u_arr[user].mark_ptr)
-              break;
-       } while (bin_search(u_arr[user].marked_obj, 0, u_arr[user].mark_ptr, object) != -1);
-       if (add_rate(&o_arr[object], random() % 5 + 1, user))
-           return 1;
-       if (add_marked_obj(&u_arr[user], object))
-           return 1;
-   }
-   return 0;
-}
+     Thr_args *a = args;
 
-// typedef struct args {
-//     unsigned count;
-//     unsigned u_size;
-//     unsigned o_size;
-//     unsigned u_offset;
-//     unsigned o_offset;
-//     User *u_arr;
-//     Object *o_arr;
-//     int result;
-// } Thr_args;
+     unsigned count = a->count;
+     unsigned u_size = a->u_size;
+     unsigned o_size = a->o_size;
+     User *u_arr = a->u_arr;
+     Object *o_arr = a->o_arr;
+     unsigned m_per_us = count / u_size;
 
-// void* worker(void* args){
-//     srandom(time(NULL));
+     unsigned seed = clock();
+     for (unsigned user = 0; user < u_size; user++) {
 
-//     Thr_args *a = args;
+         for (size_t j = 0; j < m_per_us; j++) {
+             unsigned object = ((user + j + 1) * 2654435769) % o_size;
 
-//     unsigned count = a->count;
-//     unsigned u_size = a->u_size;
-//     unsigned o_size = a->o_size;
-//     unsigned u_off = a->u_offset;
-//     unsigned o_off = a->o_offset;
-//     User *u_arr = a->u_arr;
-//     Object *o_arr = a->o_arr;
+             if (add_rate(&o_arr[object], ( (7*object*user+29) * seed >> 12) % 5 + 1, user)) {
+                 a->result = 1;
+                 pthread_exit(NULL);
+             }
+             if (add_marked_obj(&u_arr[user], object)) {
+                 a->result = 1;
+                 pthread_exit(NULL);
+             }
+         }
+     }
+     a->result = 0;
+     pthread_exit(NULL);
+ }
 
-//     for (unsigned i = 0; i < count; i++) {
-//         unsigned user = random() % u_size + u_off;
-//         unsigned object = random() % o_size + o_off;
-//         if (add_rate(&o_arr[object - o_off], random() % 5 + 1, user)) {
-//             a->result = 1;
-//             pthread_exit(NULL);
-//         }
-//         if (add_marked_obj(&u_arr[user - u_off], object)) {
-//             a->result = 1;
-//             pthread_exit(NULL);
-//         }
-//     }
-//     a->result = 0;
-//     pthread_exit(NULL);
-// }
+ int make_random_rate(Users *u, Objects *o, unsigned count, unsigned max_thr) {
+     if (count > MAX_RATE)
+         return 1;
+     pthread_t thr[max_thr];
+     int errflag = 0;
+     unsigned u_s = 0, o_s = 0, u_invl = u->size / max_thr, o_invl = o->size / max_thr;
+     Thr_args *t = calloc(max_thr, sizeof(Thr_args));
 
-// int make_random_rate(Users *u, Objects *o, unsigned count, unsigned max_thr) {
-//     if (count > MAX_RATE)
-//         return 1;
-//     pthread_t thr[max_thr];
-//     int errflag = 0;
-//     unsigned u_s = 0, o_s = 0, u_invl = u->size / max_thr, o_invl = o->size / max_thr;
-//     Thr_args *t = calloc(max_thr, sizeof(Thr_args));
-
-//     for (unsigned i = 0; i < max_thr; i++) {
-//         t[i].u_arr = &(u->array[u_s]);
-//         t[i].o_arr = &(o->array[o_s]);
-//         t[i].u_offset = u_s;
-//         t[i].o_offset = o_s;
-//         if (i < max_thr - 1) {
-//             t[i].u_size = u_invl;
-//             u_s += u_invl;
-//             t[i].o_size = o_invl;
-//             o_s += o_invl;
-//             t[i].count = count / max_thr;
-//         } else {
-//             t[i].u_size = u->size - u_s;
-//             t[i].o_size = o->size - o_s;
-//             t[i].count = count - (count / max_thr) * (max_thr - 1);
-//         }
-//         errflag = pthread_create(&(thr[i]), NULL, worker, (void *) &(t[i])) ? 1 : 0;
-//     }
-//     if (errflag) {
-//         for (unsigned i = 0; i < max_thr; i++) {
-//             pthread_cancel(thr[i]);
-//         }
-//         return 1;
-//     }
-//     errflag = 0;
-//     for (unsigned j = 0; j < max_thr; j++) {
-//         pthread_join(thr[j], NULL);
-//         errflag = errflag || t[j].result;
-//     }
-//     free(t);
-//     return errflag;
-// }
+     for (unsigned i = 0; i < max_thr; i++) {
+         t[i].u_arr = &(u->array[u_s]);
+         t[i].o_arr = &(o->array[o_s]);
+         if (i < max_thr - 1) {
+             t[i].u_size = u_invl;
+             u_s += u_invl;
+             t[i].o_size = o_invl;
+             o_s += o_invl;
+             t[i].count = count / max_thr;
+         } else {
+             t[i].u_size = u->size - u_s;
+             t[i].o_size = o->size - o_s;
+             t[i].count = count - (count / max_thr) * (max_thr - 1);
+         }
+         errflag = pthread_create(&(thr[i]), NULL, worker, (void *) &(t[i])) ? 1 : 0;
+     }
+     if (errflag) {
+         for (unsigned i = 0; i < max_thr; i++) {
+             pthread_cancel(thr[i]);
+         }
+         return 1;
+     }
+     errflag = 0;
+     for (unsigned j = 0; j < max_thr; j++) {
+         pthread_join(thr[j], NULL);
+         errflag = errflag || t[j].result;
+     }
+     free(t);
+     return errflag;
+ }
 
 void print_users(const Users *u) {
     for (unsigned i = 0; i < u->size; i++) {

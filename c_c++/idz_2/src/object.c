@@ -35,7 +35,7 @@ int add_rate(Object* obj, Mark m, unsigned user_id) {
     Rate *array = obj->rating_array;
 
     if (!size) {
-        size = 2;
+        size = 512;
         Rate *temp = calloc(size, sizeof(Rate));
         if (!temp) {
             return 1;

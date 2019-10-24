@@ -29,10 +29,10 @@ void make_heap(Top *arr, unsigned size) {
     }
 }
 
-Top extract_max(Top *arr, unsigned size) {
+Top extract_max(Top *arr, unsigned *size) {
     Top result = arr[0];
-    arr[0] = arr[--size];
-    sift_down(arr, 0, size);
+    arr[0] = arr[--*size];
+    sift_down(arr, 0, *size);
     return result;
 }
 
@@ -44,7 +44,7 @@ Top* find_top(Top * temp, unsigned size, unsigned count) {
     make_heap(temp, size);
 
     for (unsigned i = 0; i < count; i++) {
-        t_top[i] = extract_max(temp, size);
+        t_top[i] = extract_max(temp, &size);
     }
 
     return t_top;
@@ -72,7 +72,7 @@ double get_average(const Object *obj) {
     return (acc0 + acc1 + acc2 + acc3) / size;
 }
 
-Top* get_top(Objects *objs, User *user, unsigned count) {
+Top* get_top(const Objects *objs, const User *user, unsigned count) {
     unsigned size = objs->size;
     Top *temp = calloc(size, sizeof(Top));
     if (!temp)
@@ -90,7 +90,7 @@ Top* get_top(Objects *objs, User *user, unsigned count) {
             temp[i].avr_rate = -1;
             continue;
         }
-        temp[i].avr_rate = objs->array[i].rate_ptr == 0 ? 0 : get_average(&(objs->array[i]));
+        temp[i].avr_rate = objs->array[i].rate_ptr != 0 ? get_average(&(objs->array[i])) : 0;
     }
 
     Top *t_top = find_top(temp, size, count);
