@@ -1,0 +1,13 @@
+version: '3.7'
+services:
+ db:
+   image: postgres
+ web:
+   build: .
+   command: bash run.sh
+   volumes:
+     - .:/code
+   ports:
+     - "8000:8000"
+   depends_on:
+     - db

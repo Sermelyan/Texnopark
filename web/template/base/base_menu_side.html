@@ -1,0 +1,27 @@
+{% extends 'base_navbar_footer.html' %}
+
+{% block header%}
+  <div class="col-md-8 m-2">
+  {% block header_content %}
+    <h2>Header</h2>
+  {% endblock header_content %}
+  </div>
+{% endblock header %}
+
+{% block main %}
+  <div class="col-md-10 blog-main">
+    {% block main_content %}
+      {% lorem 5 b random %}
+    {% endblock main_content %}
+  </div>
+{% endblock main %}
+  
+{% block sidebar %}
+  <aside class="col-md-2 blog-sidebar">
+    <div class="position-fixed">
+    {% block side_content %}
+      {% lorem 1 b random %}
+    {% endblock side_content %}
+    </div>
+  </aside>
+{% endblock sidebar %}
