@@ -12,7 +12,6 @@ typedef struct user {
     unsigned *marked_obj;
 } __attribute__ ((packed)) User;
 
-void set_user(User* u, unsigned id);
 void free_user(User* user);
 int add_marked_obj(User* usr,unsigned obj_id);
 

@@ -6,10 +6,6 @@ Copyright 2019 Сергей Меликян АПО-12
 #include <stdlib.h>
 #include <stdio.h>
 
-void set_user(User* u, unsigned id) {
-    u->user_id = id;
-}
-
 void free_user(User* user) {
     if (!user)
         return;

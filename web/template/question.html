@@ -9,7 +9,9 @@
         <div class="col-md-10">
             <h5 class="card-title">{{q.title}}</h5>
             <p> {{q.text}}</p>
+            <p><small class="text-muted">Question id {{q.pk}} </small></p>
             <p><small class="text-muted">Added {{q.date}} </small></p>
+            {% include './include/like.html' %}    
         </div>
     </div>
     {% for a in ans %}
@@ -18,8 +20,11 @@
         <img src="{% static 'default.jpg' %}" class="card-img m-1">
       </div>
       <div class="col-md-10">
-        <p> {{a.text|truncatewords:255}}... </p>
+        <p> {{a.text}} </p>
+        <p><small class="text-muted">User {{a.user}} </small></p>
+        <p><small class="text-muted">Qst {{a.qst}} </small></p>
         <p><small class="text-muted">Added {{a.date}} </small></p>
+        {% include './include/like.html' %}            
       </div>
     </div>
   {% endfor %}

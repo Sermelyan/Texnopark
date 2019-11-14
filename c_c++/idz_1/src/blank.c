@@ -1,37 +1,16 @@
-//
-// Created by ser on 10.10.2019.
-//
-
-#ifndef BLANK_H_
-#define BLANK_H_
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <ctype.h>
-#include <string.h>
-
-#define MAXSTR 256
-#define check_and_print(out, str)\
-        if (out == stdout) {\
-            printf("%s", str);\
-        }
-
-typedef struct blank_struct {
-    unsigned long number;
-    char storage_place[MAXSTR];
-    char responsible_name[MAXSTR];
-    char responsible_surname[MAXSTR];
-} Blank;
+/*
+Copyright 2019 Сергей Меликян АПО-12
+*/
+#include "../include/blank.h"
 
 Blank* new_blank(void) {
-    return (Blank *) calloc(1, sizeof(Blank));
+    return calloc(1, sizeof(Blank));
 }
 
 //  Return 1 if string is broken else 0
 int check_string(const char *str) {
     size_t str_len = 0;
-    while (str[str_len] != '\0' && str_len < MAXSTR) {
+    while (str_len < MAXSTR && str[str_len] != '\0') {
         int c = str[str_len++];
         if (!isprint(c)) {
             return 1;
@@ -66,7 +45,7 @@ void get_string(FILE* in, char* str) {
     for (size_t i = 0;
          c != ';' && c != '\n' && c != EOF && i < MAXSTR - 1;
          c = fgetc(in), i++) {
-        str[i] = (char) c;
+        str[i] = c;
     }
 }
 
@@ -76,13 +55,13 @@ Blank* get_blank(FILE* in, FILE* out) {
     if (!temp)
         return NULL;
 
-    check_and_print(out, "Enter blank number: ");
+    check_and_print(in, "Enter blank number: ");
     fscanf(in, "%lu;", &(temp->number));
-    check_and_print(out, "Enter storage place: ");
+    check_and_print(in, "Enter storage place: ");
     get_string(in, temp->storage_place);
-    check_and_print(out, "Enter responsible name: ");
+    check_and_print(in, "Enter responsible name: ");
     get_string(in, temp->responsible_name);
-    check_and_print(out, "Enter responsible surname: ");
+    check_and_print(in, "Enter responsible surname: ");
     get_string(in, temp->responsible_surname);
 
     if (check_blank(temp)) {
@@ -95,9 +74,7 @@ Blank* get_blank(FILE* in, FILE* out) {
 
 // Print blank in output
 void print_blank(FILE *out, Blank *bl) {
-    fprintf(out, "number: %lu, storage: %s, responsible: %s %s\n",
+    fprintf(out, "number: %lu; storage: %s; responsible: %s %s\n",
             bl->number, bl->storage_place, bl->responsible_name,
             bl->responsible_surname);
 }
-
-#endif //  BLANK_H_

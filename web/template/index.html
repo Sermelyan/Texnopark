@@ -1,5 +1,12 @@
 {% extends './base/base_menu_side.html' %}
 
+{% block header_content %}
+    <ul class="list-group list-group-horizontal">
+        <li class="list-group-item"><h2>New Questions</h2></li>
+        <li class="list-group-item"><a href="{% url 'hot' %}"><h2>Hot Questions</a></h2></li>
+    </ul>
+{% endblock header_content %}
+
 {% block main_content %}
     {% include './include/qst.html' %}
 {% endblock main_content %}

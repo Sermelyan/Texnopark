@@ -8,7 +8,9 @@
       <div class="col-md-10">
         <h5 class="card-title">{{q.title}}</h5>
         <p> {{q.text|truncatewords:255}}... </p>
+        <p><small class="text-muted">Question id {{q.pk}} </small></p>
         <p><small class="text-muted">Added {{q.date}} </small></p>
+        {% include './like.html' %}    
       </div>
     </div>
   {% endfor %}

@@ -32,7 +32,6 @@ typedef struct object_array {
 } Objects;
 
 Object* create_object(unsigned id);
-void set_object(Object *o, unsigned id);
 void free_object(Object* object);
 int add_rate(Object* obj, Mark m, unsigned user_id);
 

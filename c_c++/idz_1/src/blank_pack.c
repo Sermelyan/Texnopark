@@ -1,24 +1,15 @@
-//
-// Created by ser on 10.10.2019.
-//
-
-#ifndef BLANK_PACK_H_
-#define BLANK_PACK_H_
-
-#include "blank_array.h"
-
-typedef struct blank_pack {
-    Blank_array* blanks;
-    struct blank_pack* next;
-} Blank_pack;
+/*
+Copyright 2019 Сергей Меликян АПО-12
+*/
+#include "../include/blank_pack.h"
 
 Blank_pack* new_blank_pack(size_t n) {
-    Blank_pack *temp =  (Blank_pack *) calloc(1, sizeof(Blank_pack));
+    Blank_pack *temp = calloc(1, sizeof(Blank_pack));
     temp->blanks = new_blank_array(n);
     return temp;
 }
 
-void free_blank_pack(Blank_pack* pack) {
+void free_blank_pack(Blank_pack *pack) {
     for (Blank_pack *i = pack, *n = pack->next; i;) {
         free_blank_array_full(i->blanks);
         free(i);
@@ -28,13 +19,15 @@ void free_blank_pack(Blank_pack* pack) {
     }
 }
 
+//  Compare function of 2 blancks for sort algorithm
 int is_less(Blank *left, Blank *right) {
     return left->number < right->number;
 }
 
+//  Merge sort algorithm adapted for blanks sorting
 Blank** merge_sort(Blank **up, Blank **down,
                    size_t left, size_t right,
-                   int compare(Blank* , Blank*)) {
+                   int compare(Blank *, Blank *)) {
     if (left == right) {
         down[left] = up[left];
         return down;
@@ -50,11 +43,10 @@ Blank** merge_sort(Blank **up, Blank **down,
     size_t l_cur = left, r_cur = middle + 1;
     for (size_t i = left; i <= right; i++) {
         if (l_cur <= middle && r_cur <= right) {
-            if (compare (l_buff[l_cur], r_buff[r_cur])) {
+            if (compare(l_buff[l_cur], r_buff[r_cur])) {
                 target[i] = l_buff[l_cur];
                 l_cur++;
-            }
-            else {
+            } else {
                 target[i] = r_buff[r_cur];
                 r_cur++;
             }
@@ -69,32 +61,35 @@ Blank** merge_sort(Blank **up, Blank **down,
     return target;
 }
 
+//  Find right border of pack
 size_t find_right(Blank **a, size_t left, size_t size) {
     if (left == size)
         return size + 1;
     size_t i = left + 1;
-    for (int flag = 0; i < size;) {
-        flag = ((a[i]->number - a[i-1]->number == 1) ? 0 : 1);
-        flag = flag || strcmp(a[i]->storage_place, a[i-1]->storage_place);
-        flag = flag || strcmp(a[i]->responsible_name, a[i-1]->responsible_name);
-        flag = flag || strcmp(a[i]->responsible_surname, a[i-1]->responsible_surname);
-        if (flag)
+    while (i < size) {
+        if (a[i]->number - a[i-1]->number != 1)
             break;
-        else
-            i++;
+        if (strcmp(a[i]->storage_place, a[i-1]->storage_place))
+            break;
+        if (strcmp(a[i]->responsible_name, a[i-1]->responsible_name))
+            break;
+        if (strcmp(a[i]->responsible_surname, a[i-1]->responsible_surname))
+            break;
+        i++;
     }
     return i;
 }
 
-Blank_pack* get_packs(FILE* in, FILE* out) {
-    Blank_array* blanks = get_blanks(in, out);
+// Get packs from file in, write data in out if in == stdin
+Blank_pack* get_packs(FILE *in, FILE *out) {
+    Blank_array *blanks = get_blanks(in, out);
     size_t size = blanks->size;
-    Blank **temp = (Blank **) calloc(size, sizeof(Blank *));
+    Blank **temp = calloc(size, sizeof(Blank *));
     if (!temp) {
         free_blank_array_full(blanks);
         return NULL;
     }
-    Blank **result = merge_sort(blanks->array, temp,0, size -1, is_less);
+    Blank **result = merge_sort(blanks->array, temp, 0, size - 1, is_less);
 
     size_t left = 0;
     size_t right = find_right(result, left, size);
@@ -133,8 +128,9 @@ Blank_pack* get_packs(FILE* in, FILE* out) {
     return packs;
 }
 
-void print_packs(FILE* out, Blank_pack* packs) {
-    size_t p_i = 1;
+// Print packs in out
+void print_packs(FILE *out, Blank_pack *packs) {
+    unsigned long p_i = 1;
     for (Blank_pack *i = packs, *n = packs->next; i;) {
         fprintf(out, "Pack number %lu:\n", p_i++);
         for (size_t j = 0; j < i->blanks->size; j++) {
@@ -146,5 +142,3 @@ void print_packs(FILE* out, Blank_pack* packs) {
             n = n->next;
     }
 }
-
-#endif //  BLANK_PACK_H_

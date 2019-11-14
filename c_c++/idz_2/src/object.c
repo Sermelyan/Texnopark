@@ -18,10 +18,6 @@ Object* create_object(unsigned id) {
     return temp;
 }
 
-void set_object(Object *o, unsigned id) {
-    o->obj_id = id;
-}
-
 void free_object(Object* object) {
     if (!object)
         return;

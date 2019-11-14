@@ -1,8 +1,22 @@
+/*
+Copyright 2019 Сергей Меликян АПО-12
+Для сложения чисел используется старый компьютер.
+Время, затрачиваемое на нахождение суммы двух чисел
+равно их сумме.Таким образом для нахождения суммы 
+чисел 1,2,3 может потребоваться разное время, в 
+зависимости от порядка вычислений.
+((1+2)+3) -> 1+2 + 3+3 = 9
+((1+3)+2) -> 1+3 + 4+2 = 10
+((2+3)+1) -> 2+3 + 5+1 = 11
+Требуется написать программу, которая определяет 
+минимальное время, достаточное для вычисления 
+суммы заданного набора чисел.
+*/
+
 #include <iostream>
 #include <cstring>
 #include <cassert>
 #include <sstream>
-//Считаю сумму двух минимумов. Накапливаю ее и пихаю в кучу. Пока куча не опустеет.
 
 template<class T>
 class Vector {
@@ -90,7 +104,7 @@ class Heap {
     }
     ~Heap() = default;
 
-    void Insert(T element) {
+    void Insert(const T& element) {
         arr.PushBack(element);
         siftUp(arr.Size() - 1);
     }
@@ -135,7 +149,8 @@ class Heap {
     }
 };
 
-unsigned int calcTime(Heap<unsigned int>& h) {
+unsigned int calcTime(Vector<unsigned int>& v) {
+    Heap<unsigned int> h(v);
     unsigned int sum = 0;
     while (!h.IsEmpty()) {
         unsigned int temp = h.ExtractMin();
@@ -151,19 +166,19 @@ unsigned int calcTime(Heap<unsigned int>& h) {
 }
 
 void run(std::istream& input, std::ostream& output) {
-    Heap<unsigned int> h;
     std::size_t n = 0;
     input >> n;
     assert(n < 100);
+    Vector<unsigned> array(n);
     for (std::size_t i = 0, sum = 0; i < n; i++) {
-        unsigned int temp;
+        unsigned temp;
         input >> temp;
         assert(temp > 0 && temp < 1000000000);
         sum += temp;
         assert(sum < 2000000000);
-        h.Insert(temp);
+        array.PushBack(temp);
     }
-    output << calcTime(h);
+    output << calcTime(array);
 }
 
 void test() {
