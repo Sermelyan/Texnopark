@@ -12,14 +12,22 @@ Copyright 2019 Сергей Меликян АПО-12
 #include <cassert>
 #include <climits>
 #include <iostream>
-#include <functional>
 #include <sstream>
 #include <vector>
 
 using std::size_t;
 
 template <class T> struct Comporator {
-    bool operator()(const T &lhs, const T &rhs) const { return lhs > rhs; }
+    bool operator()(const T &lhs, const T &rhs, char oper) const {
+        switch (oper) {
+        case '>':
+            return lhs > rhs;
+        case '!':
+            return lhs != rhs;
+        default:
+            return false;
+        }
+    }
 };
 
 template <class T> struct node {
@@ -41,7 +49,7 @@ template <class T, class C> class AvlTree {
 
     void Add(const T &key);
     void Delete(const T &key);
-    T StatK(unsigned pos) const;
+    T StatK(unsigned pos);
     std::vector<T> InOrder();
 
   private:
@@ -57,6 +65,8 @@ template <class T, class C> class AvlTree {
     treeNode *insert(treeNode *n, T key);
     void deleteTree(treeNode *n);
     treeNode *deleteNode(treeNode *n, const T &key);
+    treeNode *deleteMaxLeft(treeNode *n);
+    treeNode *findPos(treeNode *n, const unsigned &pos, unsigned *cPos);
 };
 
 template <class T, class C>
@@ -95,14 +105,24 @@ template <class T, class C> void AvlTree<T, C>::Add(const T &key) {
 }
 
 template <class T, class C>
+typename AvlTree<T, C>::treeNode *AvlTree<T, C>::deleteMaxLeft(treeNode *n) {
+    if (!n->Right) {
+        return n->Left;
+    }
+    n->Right = deleteMaxLeft(n->Right);
+    return balance(n);
+}
+
+template <class T, class C>
 typename AvlTree<T, C>::treeNode *AvlTree<T, C>::deleteNode(treeNode *n,
                                                             const T &key) {
     if (!n)
         return nullptr;
-    if (comparator(key, n->Data)) {
-        n = deleteNode(n->Right, key);
-    } else if (!comparator(key, n->Data)) {
-        n = deleteNode(n->Left, key);
+    if (comparator(key, n->Data, '>')) {
+        n->Right = deleteNode(n->Right, key);
+    } else if (!comparator(key, n->Data, '>') &&
+               comparator(key, n->Data, '!')) {
+        n->Left = deleteNode(n->Left, key);
     } else {
         treeNode *l = n->Left;
         treeNode *r = n->Right;
@@ -111,13 +131,15 @@ typename AvlTree<T, C>::treeNode *AvlTree<T, C>::deleteNode(treeNode *n,
 
         if (!l)
             return r;
-        treeNode *maxLeft = [l]() {
-            while (l->Right) {
-                l = l->Right;
-            }
-            return l;
-        };
-        std::function<>
+
+        treeNode *maxLeft = l;
+        while (maxLeft->Right) {
+            maxLeft = maxLeft->Right;
+        }
+        maxLeft->Left = deleteMaxLeft(l);
+        maxLeft->Right = r;
+
+        return balance(maxLeft);
     }
 
     return balance(n);
@@ -125,6 +147,29 @@ typename AvlTree<T, C>::treeNode *AvlTree<T, C>::deleteNode(treeNode *n,
 
 template <class T, class C> void AvlTree<T, C>::Delete(const T &key) {
     treeHead = deleteNode(treeHead, key);
+}
+
+template <class T, class C>
+typename AvlTree<T, C>::treeNode *
+AvlTree<T, C>::findPos(treeNode *n, const unsigned &pos, unsigned *cPos) {
+    if (!n)
+        return nullptr;
+
+    treeNode *l = findPos(n->Left, pos, cPos);
+    if (l)
+        return l;
+
+    if (pos == (*cPos)++)
+        return n;
+
+    treeNode *r = findPos(n->Right, pos, cPos);
+    return r ? r : nullptr;
+}
+
+template <class T, class C> T AvlTree<T, C>::StatK(unsigned pos) {
+    unsigned cPos = 0;
+    treeNode *n = findPos(treeHead, pos, &cPos);
+    return n ? n->Data : static_cast<T>(-1);
 }
 
 template <class T, class C> std::vector<T> AvlTree<T, C>::InOrder() {
@@ -208,23 +253,17 @@ template <class T> void run(std::istream &input, std::ostream &output) {
     AvlTree<T, Comporator<T>> at(c);
     for (size_t i = 0; i < n; i++) {
         T data;
-        // unsigned pos;
-        // input >> data >> pos;
-        input >> data;
+        unsigned pos;
+        input >> data >> pos;
         assert(data >= INT_MIN && data <= INT_MAX);
         if (c(data, static_cast<T>(0))) {
             at.Add(data);
-            // output << at.StatK(pos) << std::endl;
+            output << at.StatK(pos) << std::endl;
         } else {
             at.Delete(-data);
-            // output << at.StatK(pos) << std::endl;
+            output << at.StatK(pos) << std::endl;
         }
     }
-    std::vector<T> ord = at.InOrder();
-    for (size_t i = 0; i < n - 1; i++) {
-        output << ord[i] << " ";
-    }
-    output << ord[n - 1];
 }
 
 void test() {
@@ -232,66 +271,17 @@ void test() {
     {
         std::stringstream input;
         std::stringstream output;
-        input << "3 2 1 3";
+        input << "3 1 0 2 0 -1 0";
         run<int>(input, output);
-        assert(output.str() == "1 2 3");
+        assert(output.str() == "1\n1\n2\n");
     }
-    // 2-й тест
+    // 1-й тест из условия
     {
         std::stringstream input;
         std::stringstream output;
-        input << "5 2 1 3 6 7";
+        input << "5 40 0 10 1 4 1 -10 0 50 2";
         run<int>(input, output);
-        assert(output.str() == "1 2 3 6 7");
-    }
-    // 3-й тест
-    {
-        std::stringstream input;
-        std::stringstream output;
-        input << "10\n9 10 4 3 2 7 8 5 1 6";
-        run<int>(input, output);
-        assert(output.str() == "1 2 3 4 5 6 7 8 9 10");
-    }
-    // 4-й тест
-    {
-        std::stringstream input;
-        std::stringstream output;
-        input << "10\n4 7 5 10 3 2 8 1 6 9";
-        run<int>(input, output);
-        assert(output.str() == "1 2 3 4 5 6 7 8 9 10");
-    }
-    // 5-й тест
-    {
-        std::stringstream input;
-        std::stringstream output;
-        input << "10\n2 3 6 1 10 8 4 9 7 5";
-        run<int>(input, output);
-        assert(output.str() == "1 2 3 4 5 6 7 8 9 10");
-    }
-    // 6-й тест
-    {
-        std::stringstream input;
-        std::stringstream output;
-        input << "8 E D H F B G C A";
-        run<char>(input, output);
-        assert(output.str() == "A B C D E F G H");
-    }
-    // 7-й тест
-    {
-        std::stringstream input;
-        std::stringstream output;
-        size_t n = 100;
-        input << n << std::endl;
-        for (size_t i = n; i > 0; i--) {
-            input << i << " ";
-        }
-        std::string ethalon;
-        for (size_t j = 1; j < 100; j++) {
-            ethalon += std::to_string(j) + " ";
-        }
-        ethalon += std::to_string(n);
-        run<int>(input, output);
-        assert(output.str() == ethalon);
+        assert(output.str() == "40\n40\n10\n4\n50\n");
     }
 }
 
