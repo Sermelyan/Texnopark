@@ -13,7 +13,7 @@
 #include "MatrixRPGraph.hpp"
 #include "SetGraph.hpp"
 
-void BFS(const IGraph &graph, int vertex,
+void BFS(const IGraph &graph, unsigned int vertex,
          const std::function<void(int)> &visit) {
     std::vector<bool> visited(graph.VerticesCount(), false);
     std::queue<unsigned int> qu;
@@ -21,11 +21,11 @@ void BFS(const IGraph &graph, int vertex,
     visited[vertex] = true;
 
     while (!qu.empty()) {
-        int current = qu.front();
+        unsigned int current = qu.front();
         visit(current);
         qu.pop();
         std::vector<unsigned int> nextVertices = graph.GetNextVertices(current);
-        for (int v : nextVertices)
+        for (const auto& v : nextVertices)
             if (!visited[v]) {
                 qu.push(v);
                 visited[v] = true;
@@ -33,112 +33,12 @@ void BFS(const IGraph &graph, int vertex,
     }
 }
 
-/*TEST(BFS, List) {
-    ListGraph g(6);
-    g.AddEdge(0, 5);
-    g.AddEdge(0, 4);
-    g.AddEdge(0, 2);
-    g.AddEdge(1, 0);
-    g.AddEdge(1, 2);
-    g.AddEdge(2, 4);
-    g.AddEdge(2, 3);
-    g.AddEdge(3, 1);
-    g.AddEdge(4, 3);
-    g.AddEdge(5, 4);
-
-    std::string ethalon, str;
-    BFS(g, 5, [&ethalon](int v) { ethalon += std::to_string(v) + " "; });
-    BFS(MatrixRPGraph(g), 5, [&str](int v) { str += std::to_string(v) + " "; });
-    EXPECT_EQ(ethalon, str);
-    str.clear();
-    BFS(SetGraph(g), 5, [&str](int v) { str += std::to_string(v) + " "; });
-    ASSERT_EQ(ethalon, str);
-    str.clear();
-    BFS(ArcGraph(g), 5, [&str](int v) { str += std::to_string(v) + " "; });
-    ASSERT_EQ(ethalon, str);
-}
-
-TEST(BFS, Matrix) {
-    MatrixRPGraph g(6);
-    g.AddEdge(0, 5);
-    g.AddEdge(0, 4);
-    g.AddEdge(0, 2);
-    g.AddEdge(1, 0);
-    g.AddEdge(1, 2);
-    g.AddEdge(2, 4);
-    g.AddEdge(2, 3);
-    g.AddEdge(3, 1);
-    g.AddEdge(4, 3);
-    g.AddEdge(5, 4);
-
-    std::string ethalon, str;
-    BFS(g, 5, [&ethalon](int v) { ethalon += std::to_string(v) + " "; });
-    BFS(ListGraph(g), 5, [&str](int v) { str += std::to_string(v) + " "; });
-    EXPECT_EQ(ethalon, str);
-    str.clear();
-    BFS(SetGraph(g), 5, [&str](int v) { str += std::to_string(v) + " "; });
-    EXPECT_EQ(ethalon, str);
-    str.clear();
-    BFS(ArcGraph(g), 5, [&str](int v) { str += std::to_string(v) + " "; });
-    EXPECT_EQ(ethalon, str);
-}
-
-TEST(BFS, Set) {
-    SetGraph g(6);
-    g.AddEdge(0, 5);
-    g.AddEdge(0, 4);
-    g.AddEdge(0, 2);
-    g.AddEdge(1, 0);
-    g.AddEdge(1, 2);
-    g.AddEdge(2, 4);
-    g.AddEdge(2, 3);
-    g.AddEdge(3, 1);
-    g.AddEdge(4, 3);
-    g.AddEdge(5, 4);
-
-    std::string ethalon, str;
-    BFS(g, 5, [&ethalon](int v) { ethalon += std::to_string(v) + " "; });
-    BFS(MatrixRPGraph(g), 5, [&str](int v) { str += std::to_string(v) + " "; });
-    EXPECT_EQ(ethalon, str);
-    str.clear();
-    BFS(ListGraph(g), 5, [&str](int v) { str += std::to_string(v) + " "; });
-    ASSERT_EQ(ethalon, str);
-    str.clear();
-    BFS(ArcGraph(g), 5, [&str](int v) { str += std::to_string(v) + " "; });
-    ASSERT_EQ(ethalon, str);
-}
-
-TEST(BFS, Arc) {
-    ArcGraph g(6);
-    g.AddEdge(0, 5);
-    g.AddEdge(0, 4);
-    g.AddEdge(0, 2);
-    g.AddEdge(1, 0);
-    g.AddEdge(1, 2);
-    g.AddEdge(2, 4);
-    g.AddEdge(2, 3);
-    g.AddEdge(3, 1);
-    g.AddEdge(4, 3);
-    g.AddEdge(5, 4);
-
-    std::string ethalon, str;
-    BFS(g, 5, [&ethalon](int v) { ethalon += std::to_string(v) + " "; });
-    BFS(MatrixRPGraph(g), 5, [&str](int v) { str += std::to_string(v) + " "; });
-    EXPECT_EQ(ethalon, str);
-    str.clear();
-    BFS(ListGraph(g), 5, [&str](int v) { str += std::to_string(v) + " "; });
-    ASSERT_EQ(ethalon, str);
-    str.clear();
-    BFS(SetGraph(g), 5, [&str](int v) { str += std::to_string(v) + " "; });
-    ASSERT_EQ(ethalon, str);
-}*/
-
 std::vector<std::pair<unsigned int, unsigned int>> arcs;
 ListGraph *lg;
-MatrixRPGraph *mg;
+MatrixGraph *mg;
 SetGraph *sg;
 ArcGraph *ag;
-unsigned int count = 1000;
+unsigned int count = 25000;
 
 TEST(DataPrerpare, ArcsGen) {
     std::random_device rd{};
@@ -148,7 +48,7 @@ TEST(DataPrerpare, ArcsGen) {
     std::normal_distribution<> d{(count / 2.0), 10};
 
     for (int i = 0; i < count; ++i) {
-        for (int j = 0; j < random() % 20; ++j)
+        for (int j = 0; j < random() % 10; ++j)
             arcs.emplace_back(i, static_cast<unsigned int>(d(gen)));
     }
 }
@@ -158,7 +58,7 @@ TEST(DataPrerpare, ListAlloc) {
 }
 
 TEST(DataPrerpare, MatrixAlloc) {
-    mg = new MatrixRPGraph(count);
+    mg = new MatrixGraph(count);
 }
 
 TEST(DataPrerpare, SetAlloc) {

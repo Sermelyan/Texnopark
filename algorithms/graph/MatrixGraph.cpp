@@ -7,7 +7,7 @@
 
 MatrixGraph::MatrixGraph(unsigned int count) : matrix(count) {
     for (auto &item : matrix) {
-        item.resize(count);
+        item.assign(count, 0);
     }
 }
 
