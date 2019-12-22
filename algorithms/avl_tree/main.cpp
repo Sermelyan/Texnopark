@@ -65,7 +65,6 @@ template <class T, class C> class AvlTree {
     treeNode *insert(treeNode *n, T key);
     void deleteTree(treeNode *n);
     treeNode *deleteNode(treeNode *n, const T &key);
-    treeNode *deleteMaxLeft(treeNode *n);
     treeNode *findPos(treeNode *n, const unsigned &pos, unsigned *cPos);
 };
 
@@ -92,7 +91,7 @@ template <class T, class C>
 typename AvlTree<T, C>::treeNode *AvlTree<T, C>::insert(treeNode *n, T key) {
     if (!n)
         return new treeNode(key);
-    if (comparator(key, n->Data)) {
+    if (comparator(key, n->Data, '>')) {
         n->Right = insert(n->Right, key);
     } else {
         n->Left = insert(n->Left, key);
@@ -102,15 +101,6 @@ typename AvlTree<T, C>::treeNode *AvlTree<T, C>::insert(treeNode *n, T key) {
 
 template <class T, class C> void AvlTree<T, C>::Add(const T &key) {
     treeHead = insert(treeHead, key);
-}
-
-template <class T, class C>
-typename AvlTree<T, C>::treeNode *AvlTree<T, C>::deleteMaxLeft(treeNode *n) {
-    if (!n->Right) {
-        return n->Left;
-    }
-    n->Right = deleteMaxLeft(n->Right);
-    return balance(n);
 }
 
 template <class T, class C>
@@ -124,22 +114,30 @@ typename AvlTree<T, C>::treeNode *AvlTree<T, C>::deleteNode(treeNode *n,
                comparator(key, n->Data, '!')) {
         n->Left = deleteNode(n->Left, key);
     } else {
-        treeNode *l = n->Left;
-        treeNode *r = n->Right;
-
-        delete (n);
-
-        if (!l)
-            return r;
-
-        treeNode *maxLeft = l;
-        while (maxLeft->Right) {
-            maxLeft = maxLeft->Right;
+        if (!n->Left && !n->Right) {
+            delete n;
+            return nullptr;
+        } else if (!n->Left) {
+            treeNode *right = n->Right;
+            delete n;
+            n = right;
+        } else if (!n->Right) {
+            treeNode *left = n->Left;
+            delete n;
+            n = left;
+        } else {
+            treeNode *minParent = n;
+            treeNode *min = n->Right;
+            while(min->Left) {
+                minParent = min;
+                min = min->Left;
+                balance(min);
+            }
+            n->Data = min->Data;
+            (minParent->Left == min ? minParent->Left : minParent->Right)
+                    = min->Right;
+            delete min;
         }
-        maxLeft->Left = deleteMaxLeft(l);
-        maxLeft->Right = r;
-
-        return balance(maxLeft);
     }
 
     return balance(n);
@@ -253,10 +251,10 @@ template <class T> void run(std::istream &input, std::ostream &output) {
     AvlTree<T, Comporator<T>> at(c);
     for (size_t i = 0; i < n; i++) {
         T data;
-        unsigned pos;
+        unsigned pos = 0;
         input >> data >> pos;
         assert(data >= INT_MIN && data <= INT_MAX);
-        if (c(data, static_cast<T>(0))) {
+        if (c(data, static_cast<T>(0), '>')) {
             at.Add(data);
             output << at.StatK(pos) << std::endl;
         } else {
@@ -275,13 +273,20 @@ void test() {
         run<int>(input, output);
         assert(output.str() == "1\n1\n2\n");
     }
-    // 1-й тест из условия
     {
         std::stringstream input;
         std::stringstream output;
         input << "5 40 0 10 1 4 1 -10 0 50 2";
         run<int>(input, output);
         assert(output.str() == "40\n40\n10\n4\n50\n");
+    }
+    {
+        std::stringstream input;
+        std::stringstream output;
+        input << "18 40 0 10 0 4 0 11 0 50 0 1 0 13 0 23 0 41 0 20 0 7 0 8 0 32 0 -1 0 2 0 -2 0 -50 10 55 11";
+        run<int>(input, output);
+        std::cout << output.str() << std::endl;
+        assert(output.str() == "40\n10\n4\n4\n4\n1\n1\n1\n1\n1\n1\n1\n1\n4\n2\n4\n41\n55\n");
     }
 }
 
