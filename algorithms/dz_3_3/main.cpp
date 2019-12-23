@@ -54,7 +54,7 @@ struct less {
     }
 };
 
-typedef std::multiset<keyVal, less> priority_queue;
+typedef std::set<keyVal, less> priority_queue;
 
 int Dixtra(const ListGraph &graph, unsigned int start, unsigned finish) {
     std::vector<unsigned> vertDist(graph.VerticesCount(), INT_MAX);

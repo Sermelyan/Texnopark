@@ -59,11 +59,12 @@ template <class T, class C> class AvlTree {
     inline unsigned char height(treeNode *n);
     inline int bFactor(treeNode *n);
     inline void fixHeight(treeNode *n);
-    inline treeNode *rotateLeft(treeNode *n);
-    inline treeNode *rotateRight(treeNode *n);
+    inline treeNode *rotateLeft(treeNode *q);
+    inline treeNode *rotateRight(treeNode *p);
     inline treeNode *balance(treeNode *n);
     treeNode *insert(treeNode *n, T key);
     void deleteTree(treeNode *n);
+    treeNode *deleteMinRight(treeNode *n, treeNode **min);
     treeNode *deleteNode(treeNode *n, const T &key);
     treeNode *findPos(treeNode *n, const unsigned &pos, unsigned *cPos);
 };
@@ -104,6 +105,16 @@ template <class T, class C> void AvlTree<T, C>::Add(const T &key) {
 }
 
 template <class T, class C>
+typename AvlTree<T, C>::treeNode *AvlTree<T, C>::deleteMinRight(treeNode *n, treeNode **min) {
+    if (!n->Left) {
+        *min = n;
+        return n->Right;
+    }
+    n->Left = deleteMinRight(n->Left, min);
+    return balance(n);
+}
+
+template <class T, class C>
 typename AvlTree<T, C>::treeNode *AvlTree<T, C>::deleteNode(treeNode *n,
                                                             const T &key) {
     if (!n)
@@ -114,28 +125,14 @@ typename AvlTree<T, C>::treeNode *AvlTree<T, C>::deleteNode(treeNode *n,
                comparator(key, n->Data, '!')) {
         n->Left = deleteNode(n->Left, key);
     } else {
-        if (!n->Left && !n->Right) {
-            delete n;
-            return nullptr;
-        } else if (!n->Left) {
-            treeNode *right = n->Right;
-            delete n;
-            n = right;
-        } else if (!n->Right) {
+        if (!n->Right) {
             treeNode *left = n->Left;
             delete n;
-            n = left;
+            return left;
         } else {
-            treeNode *minParent = n;
-            treeNode *min = n->Right;
-            while(min->Left) {
-                minParent = min;
-                min = min->Left;
-                balance(min);
-            }
+            treeNode *min = nullptr;
+            n->Right = deleteMinRight(n->Right, &min);
             n->Data = min->Data;
-            (minParent->Left == min ? minParent->Left : minParent->Right)
-                    = min->Right;
             delete min;
         }
     }
@@ -283,10 +280,10 @@ void test() {
     {
         std::stringstream input;
         std::stringstream output;
-        input << "18 40 0 10 0 4 0 11 0 50 0 1 0 13 0 23 0 41 0 20 0 7 0 8 0 32 0 -1 0 2 0 -2 0 -50 10 55 11";
+        input << "19 40 0 10 0 4 0 11 0 50 0 1 0 13 0 23 0 41 0 20 0 7 0 8 0 32 0 -7 0 -8 0 -10 0 -11 0 -1 0";
         run<int>(input, output);
         std::cout << output.str() << std::endl;
-        assert(output.str() == "40\n10\n4\n4\n4\n1\n1\n1\n1\n1\n1\n1\n1\n4\n2\n4\n41\n55\n");
+        assert(output.str() == "40\n10\n4\n4\n4\n1\n1\n1\n1\n1\n1\n1\n1\n1\n1\n1\n1\n");
     }
 }
 
